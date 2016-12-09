@@ -1,0 +1,107 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html lang="en"> <head>
+<title>Appointments</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link rel="stylesheet" type="text/css"
+	 href="//cdn.jsdelivr.net/bootstrap/latest/css/bootstrap.css"
+/>
+
+
+<link rel="stylesheet" type="text/css"
+	href="/static/css/events.css"
+/>
+
+<!-- jquery from a content distribution network; probably cached -->
+<script type="text/javascript"
+	 src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js">
+</script>
+
+<!-- Ideally the rest of our javascript dependencies would be
+	 bundled and minified with 'browserify', but I've found that
+	 it difficult to handle browserify dependencies for class
+	 projects.	So, we'll pick up moment and a date range picker
+	 from CDNs instead.
+-->
+
+<script type="text/javascript" src="//cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+
+<script type="text/javascript" src="//cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.js"></script>
+<link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.css" />
+
+
+</head>
+<body>
+<div class="container">
+<header>
+<h1>Busy and Free Times</h1>
+</header>
+	<div class="row">
+		<div class="col-sm-4" style="background-color:lavender;">Busy</div>
+		{% for event in g.in_range %}
+			{% set date = event['start']['dateTime'][:10]%}
+			{% set start = event['start']['dateTime'][11:-9]%}
+			{% set end = event['end']['dateTime'][11:-9]%}
+			
+			<button class="accordion">{{date}} --> {{event['summary']}}</button>
+			<div class="panel">
+			<p>Busy: {{start}} to {{end}}</p>
+			</div>
+			<script>
+			var acc = document.getElementsByClassName("accordion");
+			var i;
+
+			for (i = 0; i < acc.length; i++) {
+				acc[i].onclick = function(){
+				this.classList.toggle("active");
+				this.nextElementSibling.classList.toggle("show");
+				}
+			}
+			</script>
+		{% endfor %}
+		
+		<div class="col-sm-4" style="background-color:lavenderblush;">Free</div>
+		{% for event in g.free_list %}
+			{% set date = event[0] %}
+			{% set start = event[1]%}
+			{% set end = event[2] %}
+			<button class="accordion">{{date}}</button>
+			<div class="panel">
+			<p>Free: {{start}} to {{end}}</p>
+			</div>
+			<script>
+			var acc = document.getElementsByClassName("accordion");
+			var i;
+
+			for (i = 0; i < acc.length; i++) {
+				acc[i].onclick = function(){
+				this.classList.toggle("active");
+				this.nextElementSibling.classList.toggle("show");
+				}
+			}
+			</script>
+		{% endfor %}
+</div>
+<br><br>
+<form action = "/reset">
+<input type = "submit" value = "Reset"/>
+</form>
+<br><br>
+
+<h2>Message a friend when you are free</h2>
+<form action = "mailto:?subject=Meet me at this time" method = "post">
+<p>Open Dates:<p>
+{% for i in g.times %}
+	{% set date = i[0] %}
+	{% set start = i[1][:2] %}
+	{% set end = i[2][:2] %}
+	
+	<input type="checkbox" name="Time free on {{date}}" value="{{start}} to {{end}}">{{date}} from {{start}} to {{end}}<br>
+	
+{% endfor %}
+<br>
+<input type = "submit" value = "Send Email"/>
+</form>
+
+
+</body></html>
